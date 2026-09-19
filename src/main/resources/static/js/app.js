@@ -1,5 +1,4 @@
-const API_BASE_URL = "http://localhost:8081/api/expenses";
-
+const API_BASE_URL = "/api/expenses";
 
 const expenseForm = document.getElementById("expenseForm");
 const expenseIdInput = document.getElementById("expenseId");
