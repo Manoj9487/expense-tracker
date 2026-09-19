@@ -1,0 +1,230 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #f4f5f7;
+    color: #1f2933;
+    line-height: 1.5;
+}
+
+.app-header {
+    background-color: #2f6f4f;
+    color: white;
+    padding: 1.25rem 2rem;
+}
+
+.app-header h1 {
+    font-size: 1.5rem;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+section {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== Dashboard ===== */
+.dashboard {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.25rem;
+    flex: 1;
+    min-width: 200px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.summary-label {
+    display: block;
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+}
+
+.summary-value {
+    display: block;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #2f6f4f;
+}
+
+.category-breakdown {
+    flex: 2;
+}
+
+.category-list {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.category-list div {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.15rem 0;
+}
+
+/* ===== Form ===== */
+.form-row {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-row label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    color: #374151;
+}
+
+.form-row input,
+.form-row select,
+.form-row textarea {
+    padding: 0.6rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.form-row textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.form-error {
+    color: #b91c1c;
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+    min-height: 1.2rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+button {
+    background-color: #2f6f4f;
+    color: white;
+    border: none;
+    padding: 0.65rem 1.4rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #255b40;
+}
+
+.secondary-btn {
+    background-color: #e5e7eb;
+    color: #1f2933;
+}
+
+.secondary-btn:hover {
+    background-color: #d1d5db;
+}
+
+.hidden {
+    display: none;
+}
+
+/* ===== Filters ===== */
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: flex-end;
+}
+
+.filter-row label {
+    font-size: 0.8rem;
+    display: block;
+    margin-bottom: 0.25rem;
+    color: #374151;
+}
+
+.filter-row select,
+.filter-row input {
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+}
+
+/* ===== Expense List ===== */
+.list-section h2 {
+    margin-bottom: 1rem;
+}
+
+.expense-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.expense-item:last-child {
+    border-bottom: none;
+}
+
+.expense-main {
+    display: flex;
+    flex-direction: column;
+}
+
+.expense-title {
+    font-weight: 600;
+}
+
+.expense-meta {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.expense-amount {
+    font-weight: 600;
+    color: #2f6f4f;
+    margin-right: 1rem;
+}
+
+.expense-actions button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    margin-left: 0.4rem;
+}
+
+.expense-actions .delete-btn {
+    background-color: #b91c1c;
+}
+
+.expense-actions .delete-btn:hover {
+    background-color: #991b1b;
+}
+
+.empty-state {
+    color: #6b7280;
+    text-align: center;
+    padding: 2rem 0;
+}
