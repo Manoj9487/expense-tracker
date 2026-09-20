@@ -120,7 +120,7 @@ Interactive Swagger UI is available once the app is running:
 
 Register or log in via `/api/auth/register` or `/api/auth/login`, copy the returned `token`, click the **Authorize** button in Swagger UI, and paste it in (no need to type "Bearer " — Swagger adds that automatically). Every "Try it out" request from the UI will then include your token, so protected endpoints can be tested directly in the browser.
 
-The raw OpenAPI 3.1 spec is also available at `http://localhost:8081/v3/api-docs`.
+The raw OpenAPI 3.1 spec is also available at `https://expense-tracker-ef8b.onrender.com/v3/api-docs`.
 
 ## Setup Instructions
 
