@@ -116,7 +116,7 @@ CREATE INDEX idx_expenses_expense_date ON expenses(expense_date);
 ## API Documentation
 
 Interactive Swagger UI is available once the app is running:
-**http://localhost:8081/swagger-ui.html**
+**https://expense-tracker-ef8b.onrender.com/swagger-ui/index.html**
 
 Register or log in via `/api/auth/register` or `/api/auth/login`, copy the returned `token`, click the **Authorize** button in Swagger UI, and paste it in (no need to type "Bearer " — Swagger adds that automatically). Every "Try it out" request from the UI will then include your token, so protected endpoints can be tested directly in the browser.
 
