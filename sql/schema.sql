@@ -14,3 +14,13 @@ create table expenses (
 
 create index idx_expenses_category on expenses(category);
 create index idx_expenses_expense_date on expenses(expense_date);
+
+create table users (
+    id bigint auto_increment primary key,
+    username varchar(50) not null unique,
+    password varchar(255) not null,
+    created_at timestamp not null default current_timestamp
+);
+
+alter table expenses add column user_id bigint not null;
+alter table expenses add constraint fk_expenses_user foreign key (user_id) references users(id);

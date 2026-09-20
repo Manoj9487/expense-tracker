@@ -1,3 +1,18 @@
+const token = localStorage.getItem("token");
+if (!token) {
+    window.location.href = "login.html";
+}
+
+function authHeaders(extra = {}) {
+    return { ...extra, "Authorization": `Bearer ${token}` };
+}
+
+function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    window.location.href = "login.html";
+}
+
 const API_BASE_URL = "/api/expenses";
 
 const expenseForm = document.getElementById("expenseForm");
@@ -32,12 +47,24 @@ const clearFiltersBtn = document.getElementById("clearFiltersBtn");
 document.addEventListener("DOMContentLoaded", () => {
     loadExpenses();
     loadSummary();
+    expenseDateInput.value = new Date().toISOString().split("T")[0];
 
     expenseForm.addEventListener("submit", handleFormSubmit);
     cancelEditBtn.addEventListener("click", exitEditMode);
     applyFiltersBtn.addEventListener("click", loadExpenses);
     clearFiltersBtn.addEventListener("click", clearFilters);
 });
+
+// ===== Shared 401 handler =====
+// If a response comes back unauthorized, the token is missing/expired/invalid —
+// force the user back to login rather than showing a confusing broken UI.
+function handleUnauthorized(response) {
+    if (response.status === 401) {
+        logout();
+        return true;
+    }
+    return false;
+}
 
 async function loadExpenses() {
     if (!validateDateRange()) return;
@@ -47,7 +74,9 @@ async function loadExpenses() {
 
     try {
         const url = buildExpenseListUrl();
-        const response = await fetch(url);
+        const response = await fetch(url, { headers: authHeaders() });
+
+        if (handleUnauthorized(response)) return;
 
         if (!response.ok) {
             throw new Error("Failed to load expenses");
@@ -125,12 +154,16 @@ function validateDateRange() {
 }
 
 function showListLoading() {
-    expenseListEl.innerHTML = `<p class="empty-state">Loading...</p>`;
+    expenseListEl.innerHTML = `<div class="spinner-wrap"><div class="spinner"></div></div>`;
 }
 
 function renderExpenseList(expenses) {
     if (!expenses || expenses.length === 0) {
-        expenseListEl.innerHTML = `<p class="empty-state">No expenses yet. Add one above.</p>`;
+        expenseListEl.innerHTML = `
+          <div class="empty-state">
+            <div style="font-size:2rem;">🧾</div>
+            <p>No expenses yet — add your first one above.</p>
+          </div>`;
         return;
     }
 
@@ -154,12 +187,14 @@ function renderExpenseList(expenses) {
         </div>
     `).join("");
 }
+
 async function loadSummary() {
     totalSpendingEl.textContent = "...";
     monthlySpendingEl.textContent = "...";
 
     try {
-        const response = await fetch(`${API_BASE_URL}/summary`);
+        const response = await fetch(`${API_BASE_URL}/summary`, { headers: authHeaders() });
+        if (handleUnauthorized(response)) return;
         if (!response.ok) throw new Error("Failed to load summary");
 
         const summary = await response.json();
@@ -168,8 +203,10 @@ async function loadSummary() {
 
         const now = new Date();
         const monthResponse = await fetch(
-            `${API_BASE_URL}/monthly-summary?year=${now.getFullYear()}&month=${now.getMonth() + 1}`
+            `${API_BASE_URL}/monthly-summary?year=${now.getFullYear()}&month=${now.getMonth() + 1}`,
+            { headers: authHeaders() }
         );
+        if (handleUnauthorized(monthResponse)) return;
         if (!monthResponse.ok) throw new Error("Failed to load monthly summary");
 
         const monthSummary = await monthResponse.json();
@@ -184,7 +221,7 @@ async function loadSummary() {
 
 function renderCategoryBreakdown(categoryBreakdown) {
     if (!categoryBreakdown || categoryBreakdown.length === 0) {
-        categoryListEl.innerHTML = `<div>No data yet</div>`;
+        categoryListEl.innerHTML = `<div style="text-align:center; padding:0.5rem 0; color:var(--muted);">Nothing tracked yet</div>`;
         return;
     }
 
@@ -218,9 +255,11 @@ async function handleFormSubmit(event) {
     try {
         const response = await fetch(url, {
             method: method,
-            headers: { "Content-Type": "application/json" },
+            headers: authHeaders({ "Content-Type": "application/json" }),
             body: JSON.stringify(payload)
         });
+
+        if (handleUnauthorized(response)) return;
 
         if (!response.ok) {
             const errorBody = await response.json();
@@ -232,6 +271,7 @@ async function handleFormSubmit(event) {
         exitEditMode();
         loadExpenses();
         loadSummary();
+        showToast(isEditing ? "Expense updated" : "Expense added");
     } catch (error) {
         console.error(error);
         formError.textContent = "Network error. Please check your connection and try again.";
@@ -251,7 +291,8 @@ function showFormErrors(errorBody) {
 
 async function startEdit(id) {
     try {
-        const response = await fetch(`${API_BASE_URL}/${id}`);
+        const response = await fetch(`${API_BASE_URL}/${id}`, { headers: authHeaders() });
+        if (handleUnauthorized(response)) return;
         if (!response.ok) throw new Error("Failed to load expense");
 
         const expense = await response.json();
@@ -277,6 +318,7 @@ async function startEdit(id) {
 
 function exitEditMode() {
     resetForm();
+    expenseDateInput.value = new Date().toISOString().split("T")[0];
     formTitle.textContent = "Add Expense";
     submitBtn.textContent = "Add Expense";
     cancelEditBtn.classList.add("hidden");
@@ -294,7 +336,12 @@ async function deleteExpense(id) {
     if (!confirmed) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/${id}`, { method: "DELETE" });
+        const response = await fetch(`${API_BASE_URL}/${id}`, {
+            method: "DELETE",
+            headers: authHeaders()
+        });
+
+        if (handleUnauthorized(response)) return;
 
         if (!response.ok && response.status !== 204) {
             throw new Error("Failed to delete expense");
@@ -302,6 +349,7 @@ async function deleteExpense(id) {
 
         loadExpenses();
         loadSummary();
+        showToast("Expense deleted");
     } catch (error) {
         console.error(error);
         alert("Could not delete this expense. Please try again.");
@@ -318,8 +366,24 @@ function clearFilters() {
     loadExpenses();
 }
 
+function showToast(message, isError = false) {
+    const container = document.getElementById("toastContainer");
+    if (!container) return; // safe no-op if the container isn't in index.html yet
+    const toast = document.createElement("div");
+    toast.className = "toast" + (isError ? " error" : "");
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
 function formatCurrency(amount) {
-    return `₹${Number(amount).toFixed(2)}`;
+    const num = Number(amount);
+    const isNegative = num < 0;
+    const absFormatted = new Intl.NumberFormat('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(Math.abs(num));
+    return `${isNegative ? '-' : ''}₹${absFormatted}`;
 }
 
 function formatDate(dateStr) {

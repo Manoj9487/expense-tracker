@@ -10,6 +10,7 @@
 
 <header class="app-header">
     <h1>Personal Expense Tracker</h1>
+    <button type="button" onclick="logout()" class="secondary-btn" style="float:right;">Logout</button>
 </header>
 
 <main class="container">
@@ -17,11 +18,11 @@
     <section class="dashboard" id="dashboard">
         <div class="summary-card">
             <span class="summary-label">Total Spending</span>
-            <span class="summary-value" id="totalSpending">$0.00</span>
+            <span class="summary-value" id="totalSpending">₹0.00</span>
         </div>
         <div class="summary-card">
             <span class="summary-label">This Month</span>
-            <span class="summary-value" id="monthlySpending">$0.00</span>
+            <span class="summary-value" id="monthlySpending">₹0.00</span>
         </div>
         <div class="summary-card category-breakdown" id="categoryBreakdown">
             <span class="summary-label">By Category</span>
@@ -136,6 +137,8 @@
     </section>
 
 </main>
+
+<div id="toastContainer" style="position:fixed; bottom:20px; right:20px; z-index:999;"></div>
 
 <script src="js/app.js"></script>
 </body>

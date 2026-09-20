@@ -228,3 +228,112 @@ button:hover {
     text-align: center;
     padding: 2rem 0;
 }
+.spinner {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border: 3px solid #d1d5db;
+  border-top-color: #2f6f4f;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 1.5rem auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner-wrap { text-align: center; padding: 1rem 0; }
+
+.toast {
+  background: #2f6f4f;
+  color: white;
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+  margin-top: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  animation: slideIn 0.25s ease-out, fadeOut 0.4s ease-in 2.6s forwards;
+}
+.toast.error {
+  background: #b91c1c;
+}
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeOut {
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* ===== Auth Page (login.html / register) ===== */
+body:has(.auth-card) {
+    background: linear-gradient(135deg, #eef2f0 0%, #dfe8e3 100%);
+    min-height: 100vh;
+}
+
+.auth-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2.5rem 2.5rem 2rem;
+    box-shadow: 0 10px 40px rgba(47, 111, 79, 0.12), 0 2px 8px rgba(0, 0, 0, 0.05);
+    animation: fadeUp 0.35s ease;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.auth-card h2 {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #1f2933;
+    margin-bottom: 1.75rem;
+    text-align: center;
+}
+
+.auth-card .form-row input {
+    padding: 0.7rem 0.9rem;
+    border-radius: 10px;
+    border: 1.5px solid #d1d5db;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auth-card .form-row input:focus {
+    outline: none;
+    border-color: #2f6f4f;
+    box-shadow: 0 0 0 3px rgba(47, 111, 79, 0.15);
+}
+
+.auth-card button[type="submit"] {
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.auth-card button[type="submit"]:active {
+    transform: scale(0.98);
+}
+
+.toggle-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.toggle-link a {
+    color: #2f6f4f;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.toggle-link a:hover {
+    text-decoration: underline;
+}
+
+.auth-error:not(:empty) {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    padding: 0.6rem 0.9rem;
+    border-radius: 8px;
+}

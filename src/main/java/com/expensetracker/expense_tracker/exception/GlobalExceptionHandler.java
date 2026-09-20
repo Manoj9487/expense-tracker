@@ -89,4 +89,10 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
+
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthFailure(org.springframework.security.core.AuthenticationException ex) {
+        ErrorResponse error = new ErrorResponse(401, "Invalid username or password", java.time.LocalDateTime.now());
+        return ResponseEntity.status(401).body(error);
+    }
 }

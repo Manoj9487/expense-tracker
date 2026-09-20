@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Expense Tracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { display:flex; align-items:center; justify-content:center; min-height:100vh; padding: 1rem; }
+        .auth-card { max-width:400px; width:100%; }
+    </style>
+</head>
+<body>
+<section class="auth-card">
+    <h2 id="authTitle">Log In</h2>
+    <form id="authForm">
+        <div class="form-row">
+            <label for="username">Username</label>
+            <input type="text" id="username" autocomplete="username" required minlength="3">
+        </div>
+        <div class="form-row">
+            <label for="password">Password</label>
+            <input type="password" id="password" autocomplete="current-password" required minlength="6">
+        </div>
+        <div class="form-error auth-error" id="authError"></div>
+        <button type="submit" id="authSubmitBtn">Log In</button>
+    </form>
+    <p class="toggle-link">
+        <a href="#" id="toggleModeLink">Don't have an account? Register</a>
+    </p>
+</section>
+
+<script>
+    const API_BASE = "/api/auth";
+    let isRegisterMode = false;
+
+    const authForm = document.getElementById("authForm");
+    const authTitle = document.getElementById("authTitle");
+    const authSubmitBtn = document.getElementById("authSubmitBtn");
+    const authError = document.getElementById("authError");
+    const toggleModeLink = document.getElementById("toggleModeLink");
+
+    toggleModeLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      isRegisterMode = !isRegisterMode;
+      authTitle.textContent = isRegisterMode ? "Register" : "Log In";
+      authSubmitBtn.textContent = isRegisterMode ? "Register" : "Log In";
+      toggleModeLink.textContent = isRegisterMode ? "Already have an account? Log In" : "Don't have an account? Register";
+      authError.textContent = "";
+    });
+
+    authForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      authError.textContent = "";
+
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      const endpoint = isRegisterMode ? "/register" : "/login";
+
+      try {
+        const response = await fetch(API_BASE + endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          authError.textContent = err.message || "Invalid username or password.";
+          return;
+        }
+
+        const data = await response.json();
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("username", data.username);
+        window.location.href = "index.html";
+      } catch (err) {
+        authError.textContent = "Network error. Please try again.";
+      }
+    });
+</script>
+</body>
+</html>

@@ -5,9 +5,12 @@ import com.expensetracker.expense_tracker.dto.ExpenseRequestDTO;
 import com.expensetracker.expense_tracker.dto.ExpenseResponseDTO;
 import com.expensetracker.expense_tracker.entity.Category;
 import com.expensetracker.expense_tracker.entity.Expense;
+import com.expensetracker.expense_tracker.entity.User;
 import com.expensetracker.expense_tracker.exception.ExpenseNotFoundException;
 import com.expensetracker.expense_tracker.repository.ExpenseRepository;
+import com.expensetracker.expense_tracker.repository.UserRepository;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,23 +22,33 @@ import java.util.stream.Collectors;
 public class ExpenseService {
 
     private final ExpenseRepository expenseRepository;
+    private final UserRepository userRepository;
 
-    public ExpenseService(ExpenseRepository expenseRepository) {
+    public ExpenseService(ExpenseRepository expenseRepository, UserRepository userRepository) {
         this.expenseRepository = expenseRepository;
+        this.userRepository = userRepository;
     }
 
+    // ===== Resolve the currently authenticated user =====
+    private User getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("Authenticated user not found: " + username));
+    }
+
+    // ===== Create =====
     public ExpenseResponseDTO createExpense(ExpenseRequestDTO dto) {
         Expense expense = mapToEntity(dto);
+        expense.setUser(getCurrentUser());
         Expense saved = expenseRepository.save(expense);
         return mapToResponseDTO(saved);
     }
 
+    // ===== Read =====
     public List<ExpenseResponseDTO> getAllExpenses(String sortBy, String direction) {
         Sort sort = buildSort(sortBy, direction);
-        return expenseRepository.findAll(sort)
-                .stream()
-                .map(this::mapToResponseDTO)
-                .collect(Collectors.toList());
+        return expenseRepository.findByUser(getCurrentUser(), sort)
+                .stream().map(this::mapToResponseDTO).collect(Collectors.toList());
     }
 
     public ExpenseResponseDTO getExpenseById(Long id) {
@@ -44,59 +57,52 @@ public class ExpenseService {
     }
 
     public List<ExpenseResponseDTO> getExpensesByCategory(Category category) {
-        return expenseRepository.findByCategory(category)
-                .stream()
-                .map(this::mapToResponseDTO)
-                .collect(Collectors.toList());
+        return expenseRepository.findByUserAndCategory(getCurrentUser(), category)
+                .stream().map(this::mapToResponseDTO).collect(Collectors.toList());
     }
 
     public List<ExpenseResponseDTO> getExpensesByDateRange(LocalDate startDate, LocalDate endDate) {
-        return expenseRepository.findByExpenseDateBetween(startDate, endDate)
-                .stream()
-                .map(this::mapToResponseDTO)
-                .collect(Collectors.toList());
+        return expenseRepository.findByUserAndExpenseDateBetween(getCurrentUser(), startDate, endDate)
+                .stream().map(this::mapToResponseDTO).collect(Collectors.toList());
     }
 
-
+    // ===== Update =====
     public ExpenseResponseDTO updateExpense(Long id, ExpenseRequestDTO dto) {
         Expense existing = findEntityOrThrow(id);
-
         existing.setTitle(dto.getTitle());
         existing.setAmount(dto.getAmount());
         existing.setCategory(dto.getCategory());
         existing.setExpenseDate(dto.getExpenseDate());
         existing.setPaymentMethod(dto.getPaymentMethod());
         existing.setDescription(dto.getDescription());
-
-
         Expense updated = expenseRepository.save(existing);
         return mapToResponseDTO(updated);
     }
 
-
+    // ===== Delete =====
     public void deleteExpense(Long id) {
         Expense existing = findEntityOrThrow(id);
         expenseRepository.delete(existing);
     }
 
+    // ===== Summaries =====
     public BigDecimal getTotalExpenses() {
-        return expenseRepository.getTotalExpenses();
+        return expenseRepository.getTotalExpenses(getCurrentUser());
     }
 
     public BigDecimal getMonthlyTotal(int year, int month) {
-        return expenseRepository.getTotalExpensesForMonth(year, month);
+        return expenseRepository.getTotalExpensesForMonth(getCurrentUser(), year, month);
     }
 
     public List<CategorySummaryDTO> getCategoryWiseSpending() {
-        List<Object[]> rawResults = expenseRepository.getCategoryWiseSpending();
-        return rawResults.stream()
+        return expenseRepository.getCategoryWiseSpending(getCurrentUser()).stream()
                 .map(row -> new CategorySummaryDTO((Category) row[0], (BigDecimal) row[1]))
                 .collect(Collectors.toList());
     }
 
-
+    // ===== Private helpers =====
     private Expense findEntityOrThrow(Long id) {
-        return expenseRepository.findById(id)
+        return expenseRepository.findByIdAndUser(id, getCurrentUser())
                 .orElseThrow(() -> new ExpenseNotFoundException(id));
     }
 
@@ -119,14 +125,8 @@ public class ExpenseService {
 
     private ExpenseResponseDTO mapToResponseDTO(Expense expense) {
         return new ExpenseResponseDTO(
-                expense.getId(),
-                expense.getTitle(),
-                expense.getAmount(),
-                expense.getCategory(),
-                expense.getExpenseDate(),
-                expense.getPaymentMethod(),
-                expense.getDescription(),
-                expense.getCreatedAt()
+                expense.getId(), expense.getTitle(), expense.getAmount(), expense.getCategory(),
+                expense.getExpenseDate(), expense.getPaymentMethod(), expense.getDescription(), expense.getCreatedAt()
         );
     }
 }
